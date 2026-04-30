@@ -26,7 +26,7 @@ local UNLOAD_ATLAS = hash("UNLOAD_ATLAS")
 ---@field name hash
 ---@field loaded boolean
 ---@field enough_resources boolean
----@field missing_resources table
+---@field resources table
 
 ---@type hash|nil
 local current_factory = nil
@@ -256,12 +256,12 @@ end
 
 ---Check mount loaded state
 ---@param name hash
----@param missing_resources table
-function M.check_proxy_state(name, missing_resources)
+---@param resources table
+function M.check_proxy_state(name, resources)
     assert(M.is_proxy_exist(name), "No proxy found with the name " .. tostring(name))
     local proxy = proxies[name]
-    proxy.missing_resources = missing_resources
-    proxy.enough_resources = next(missing_resources) == nil
+    proxy.resources = resources
+    proxy.enough_resources = next(resources) ~= nil or not mount_loader.is_built_with_excluded_files
     if proxy.enough_resources and proxy_wait_list[proxy.name] then
         M.load_proxy(proxy.name)
     end
@@ -270,18 +270,18 @@ end
 ---Register proxy
 ---@param name hash
 ---@param mount_key hash
----@param missing_resources table
+---@param resources table
 ---@param proxy_url url
 ---@param url url|nil
-function M.register_proxy(name, mount_key, missing_resources, proxy_url, url)
+function M.register_proxy(name, mount_key, resources, proxy_url, url)
     assert(not M.is_proxy_exist(name), "Proxy already exists with the same name " .. tostring(name))
     proxies[name] = {
         url = url or msg.url(),
-        missing_resources = missing_resources,
+        resources = resources,
         name = name,
         mount_key = mount_key,
         proxy_url = proxy_url,
-        enough_resources = next(missing_resources) == nil,
+        enough_resources = next(resources) ~= nil or not mount_loader.is_built_with_excluded_files,
         loaded = false
     }
     mount_loader.register_proxy(mount_key, proxies[name].url)

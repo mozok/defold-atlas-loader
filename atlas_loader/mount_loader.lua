@@ -278,6 +278,8 @@ function M.get_file_data(file_name)
     return atlas_files[hash(file_name)]
 end
 
+M.is_built_with_excluded_files = liveupdate and type(liveupdate.is_built_with_excluded_files) == "function" and liveupdate.is_built_with_excluded_files()
+
 ---Load external data
 ---@param info atlas_mount_info
 function M.load(info)
@@ -291,8 +293,7 @@ function M.load(info)
     if M.use_html_loader and html_loader then
         html_loader.show()
     end
-    if not liveupdate
-        or (type(liveupdate.is_built_with_excluded_files) == "function" and not liveupdate.is_built_with_excluded_files()) then
+    if not M.is_built_with_excluded_files then
         mount_loaded(data)
     else
         ---@type atlas_mount[]

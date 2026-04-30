@@ -1,4 +1,6 @@
 [liveupdate]
 zip-filepath = \_bundle
 mode = Zip
+save-zip-in-bundle-folder = 1
+zip-filename = mount_4
 
