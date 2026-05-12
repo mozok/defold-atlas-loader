@@ -19,6 +19,11 @@ local PROGRESS_COMPLETED = 10000000
 local CHECK_PROXY_STATE = hash("CHECK_PROXY_STATE")
 
 local BASE = "_base"
+local BASE_HASH = hash(BASE)
+
+local function is_mount_name_equal(name, file_name)
+    return name == file_name or name == hash(file_name)
+end
 
 ---@enum mount_loader_events
 M.EVENTS = {
@@ -34,7 +39,7 @@ M.use_html_loader = false        ---Allow use of html loader extention to displa
 M.attempt_count = 50             ---Attempts count for loading mount
 
 ---@class atlas_mount
----@field name string
+---@field name string|hash
 ---@field priority number
 ---@field uri string
 
@@ -70,7 +75,7 @@ M.attempt_count = 50             ---Attempts count for loading mount
 local function is_in_mount(data, mounts)
     mounts = mounts or liveupdate.get_mounts()
     for key, mount in pairs(mounts) do
-        if data.file_name == mount.name then
+        if is_mount_name_equal(mount.name, data.file_name) then
             return true
         end
     end
@@ -343,10 +348,10 @@ function M.remove_free_mounts()
     local mounts = liveupdate.get_mounts()
     local old_mount
     for key, mount in pairs(mounts) do
-        if mount.name ~= BASE then
+        if mount.name ~= BASE and mount.name ~= BASE_HASH then
             old_mount = true
             for i, data in pairs(atlas_mounts) do
-                if mount.name == data.file_name then
+                if is_mount_name_equal(mount.name, data.file_name) then
                     old_mount = false
                     break
                 end
